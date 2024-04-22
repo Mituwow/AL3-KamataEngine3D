@@ -7,7 +7,7 @@ GameScene::GameScene() {}
 GameScene::~GameScene() {
 	// 5.3Dモデルの解放
 	delete model_;
-	//10.自機の解放
+	// 10.自機の解放
 	delete player_;
 }
 
@@ -25,7 +25,7 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	// 10.自機の生成・初期化
 	player_ = new Player();
-	player_->Initialize();
+	player_->Initialize(model_,modelTextureHandle_);
 }
 
 void GameScene::Update() {
@@ -56,7 +56,7 @@ void GameScene::Draw() {
 	// 3Dオブジェクト描画前処理
 	Model::PreDraw(commandList);
 
-	//12.自機の描画
+	// 12.自機の描画
 	player_->Draw();
 
 	// 3Dオブジェクト描画後処理
