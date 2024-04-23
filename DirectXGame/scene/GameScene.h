@@ -41,12 +41,6 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
-	// 3.3Dモデルデータ
-	Model* model_ = nullptr;
-	// 6.ビュープロジェクション
-	ViewProjection viewProjection_;
-	//9.自機
-	Player* player_ = nullptr;
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
@@ -55,7 +49,12 @@ private: // メンバ変数
 
 	//1.テクスチャハンドル
 	uint32_t modelTextureHandle_ = 0;
-
+	// 3.3Dモデルデータ
+	Model* model_ = nullptr;
+	// 6.ビュープロジェクション
+	ViewProjection viewProjection_;
+	//9.自機
+	Player* player_ = nullptr;
 
 	/// <summary>
 	/// ゲームシーン用

@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "TextureManager.h"
 #include <cassert>
+#include"Player.h"
 
 GameScene::GameScene() {}
 
@@ -25,7 +26,7 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	// 10.自機の生成・初期化
 	player_ = new Player();
-	player_->Initialize(model_,modelTextureHandle_);
+	player_->Initialize(model_, modelTextureHandle_,&viewProjection_);
 }
 
 void GameScene::Update() {
