@@ -7,12 +7,13 @@ GameScene::GameScene() {}
 
 GameScene::~GameScene() {
 	delete blockModel_;
-	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
-		delete worldTransformBlock;
+	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			delete worldTransformBlock;
+		}
 	}
 	worldTransformBlocks_.clear();
 }
-
 
 Matrix4x4 GameScene::Multiply(const Matrix4x4& a, const Matrix4x4& b) {
 	Matrix4x4 result;
@@ -24,83 +25,93 @@ Matrix4x4 GameScene::Multiply(const Matrix4x4& a, const Matrix4x4& b) {
 	return result;
 }
 
-
 void GameScene::Initialize() {
 
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 
-	//ビュープロの初期化
+	// ビュープロの初期化
 	viewProjection_.Initialize();
 	// ブロックのモデル
 	blockModel_ = Model::Create();
 	// 要素数
-	const uint32_t kNumBlockHorizontal = 20;
+	const uint32_t kNumBlockVirtical = 10;   // タテ
+	const uint32_t kNumBlockHorizontal = 20; // ヨコ
 	// ブロック1個分の横幅
+	const float kBlockHeight = 2.0f;
 	const float kBlockWidth = 2.0f;
+
 	// 要素数を変更する
-	worldTransformBlocks_.resize(kNumBlockHorizontal);
+
+	worldTransformBlocks_.resize(kNumBlockVirtical);
+	for (uint32_t i = 0; i < kNumBlockVirtical; i++) {
+		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
+	}
+
 	// キューブの生成
-	for (uint32_t i = 0; i < kNumBlockHorizontal; i++) {
-		worldTransformBlocks_[i] = new WorldTransform();
-		worldTransformBlocks_[i]->Initialize();
-		worldTransformBlocks_[i]->translation_.x = kBlockWidth * i;
-		worldTransformBlocks_[i]->translation_.y = 0.0f;
+	for (uint32_t i = 0; i < kNumBlockVirtical; i++) {
+		for (uint32_t j = 0; j < kNumBlockHorizontal; j++) {
+			worldTransformBlocks_[i][j] = new WorldTransform();
+			worldTransformBlocks_[i][j]->Initialize();
+			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
+			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
+		}
 	}
 }
 
-
 void GameScene::Update() {
-	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
-		// 拡縮行列の作成
-		Matrix4x4 scaleMatrix = {0};
-		scaleMatrix.m[0][0] = worldTransformBlock->scale_.x;
-		scaleMatrix.m[1][1] = worldTransformBlock->scale_.y;
-		scaleMatrix.m[2][2] = worldTransformBlock->scale_.z;
-		scaleMatrix.m[3][3] = 1;
+	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			// 拡縮行列の作成
+			Matrix4x4 scaleMatrix = {0};
+			scaleMatrix.m[0][0] = worldTransformBlock->scale_.x;
+			scaleMatrix.m[1][1] = worldTransformBlock->scale_.y;
+			scaleMatrix.m[2][2] = worldTransformBlock->scale_.z;
+			scaleMatrix.m[3][3] = 1;
 
-		// XYZ軸それぞれの回転行列の作成(これをヘッダーにまとめて呼びやすくするとなお良し)
-		// X
-		Matrix4x4 rotateXMatrix = {0};
-		rotateXMatrix.m[0][0] = 1;
-		rotateXMatrix.m[1][1] = std::cos(worldTransformBlock->rotation_.x);
-		rotateXMatrix.m[1][2] = std::sin(worldTransformBlock->rotation_.x);
-		rotateXMatrix.m[2][1] = -std::sin(worldTransformBlock->rotation_.x);
-		rotateXMatrix.m[2][2] = std::cos(worldTransformBlock->rotation_.x);
-		rotateXMatrix.m[3][3] = 1;
-		// Y
-		Matrix4x4 rotateYMatrix = {0};
-		rotateYMatrix.m[0][0] = std::cos(worldTransformBlock->rotation_.y);
-		rotateYMatrix.m[0][2] = -std::sin(worldTransformBlock->rotation_.y);
-		rotateYMatrix.m[1][1] = 1;
-		rotateYMatrix.m[2][0] = std::sin(worldTransformBlock->rotation_.y);
-		rotateYMatrix.m[2][2] = std::cos(worldTransformBlock->rotation_.y);
-		rotateYMatrix.m[3][3] = 1;
-		// Z
-		Matrix4x4 rotateZMatrix = {0};
-		rotateZMatrix.m[0][0] = std::cos(worldTransformBlock->rotation_.z);
-		rotateZMatrix.m[0][1] = std::sin(worldTransformBlock->rotation_.z);
-		rotateZMatrix.m[1][0] = -std::sin(worldTransformBlock->rotation_.z);
-		rotateZMatrix.m[1][1] = std::cos(worldTransformBlock->rotation_.z);
-		rotateZMatrix.m[2][2] = 1;
-		rotateZMatrix.m[3][3] = 1;
-		// XYZ回転行列の合成
-		Matrix4x4 rotateXYZMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
+			// XYZ軸それぞれの回転行列の作成(これをヘッダーにまとめて呼びやすくするとなお良し)
+			// X
+			Matrix4x4 rotateXMatrix = {0};
+			rotateXMatrix.m[0][0] = 1;
+			rotateXMatrix.m[1][1] = std::cos(worldTransformBlock->rotation_.x);
+			rotateXMatrix.m[1][2] = std::sin(worldTransformBlock->rotation_.x);
+			rotateXMatrix.m[2][1] = -std::sin(worldTransformBlock->rotation_.x);
+			rotateXMatrix.m[2][2] = std::cos(worldTransformBlock->rotation_.x);
+			rotateXMatrix.m[3][3] = 1;
+			// Y
+			Matrix4x4 rotateYMatrix = {0};
+			rotateYMatrix.m[0][0] = std::cos(worldTransformBlock->rotation_.y);
+			rotateYMatrix.m[0][2] = -std::sin(worldTransformBlock->rotation_.y);
+			rotateYMatrix.m[1][1] = 1;
+			rotateYMatrix.m[2][0] = std::sin(worldTransformBlock->rotation_.y);
+			rotateYMatrix.m[2][2] = std::cos(worldTransformBlock->rotation_.y);
+			rotateYMatrix.m[3][3] = 1;
+			// Z
+			Matrix4x4 rotateZMatrix = {0};
+			rotateZMatrix.m[0][0] = std::cos(worldTransformBlock->rotation_.z);
+			rotateZMatrix.m[0][1] = std::sin(worldTransformBlock->rotation_.z);
+			rotateZMatrix.m[1][0] = -std::sin(worldTransformBlock->rotation_.z);
+			rotateZMatrix.m[1][1] = std::cos(worldTransformBlock->rotation_.z);
+			rotateZMatrix.m[2][2] = 1;
+			rotateZMatrix.m[3][3] = 1;
+			// XYZ回転行列の合成
+			Matrix4x4 rotateXYZMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
 
-		// 平行移動行列の作成
-		Matrix4x4 translationMatrix = {0};
-		translationMatrix.m[0][0] = 1;
-		translationMatrix.m[1][1] = 1;
-		translationMatrix.m[2][2] = 1;
-		translationMatrix.m[3][0] = worldTransformBlock->translation_.x;
-		translationMatrix.m[3][1] = worldTransformBlock->translation_.y;
-		translationMatrix.m[3][2] = worldTransformBlock->translation_.z;
-		translationMatrix.m[3][3] = 1;
-		// すべてを掛け合わせてワールド行列に代入
-		worldTransformBlock->matWorld_ = Multiply(scaleMatrix, Multiply(rotateXYZMatrix, translationMatrix));
-		//定数バッファに転送する
-		worldTransformBlock->TransferMatrix();
+			// 平行移動行列の作成
+			Matrix4x4 translationMatrix = {0};
+			translationMatrix.m[0][0] = 1;
+			translationMatrix.m[1][1] = 1;
+			translationMatrix.m[2][2] = 1;
+			translationMatrix.m[3][0] = worldTransformBlock->translation_.x;
+			translationMatrix.m[3][1] = worldTransformBlock->translation_.y;
+			translationMatrix.m[3][2] = worldTransformBlock->translation_.z;
+			translationMatrix.m[3][3] = 1;
+			// すべてを掛け合わせてワールド行列に代入
+			worldTransformBlock->matWorld_ = Multiply(scaleMatrix, Multiply(rotateXYZMatrix, translationMatrix));
+			// 定数バッファに転送する
+			worldTransformBlock->TransferMatrix();
+		}
 	}
 }
 
@@ -130,12 +141,11 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-
-	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
-		blockModel_->Draw(*worldTransformBlock, viewProjection_);
+	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			blockModel_->Draw(*worldTransformBlock, viewProjection_);
+		}
 	}
-
-
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();

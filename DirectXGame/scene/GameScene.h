@@ -7,7 +7,7 @@
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
-#include <vector>	//可変個配列用
+#include <vector> //可変個配列用
 
 /// <summary>
 /// ゲームシーン
@@ -40,16 +40,14 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
-
-	//ブロックのモデル
+	// ブロックのモデル
 	Model* blockModel_ = nullptr;
-	std::vector<WorldTransform*> worldTransformBlocks_;
+	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 	// ビュープロジェクション
 	ViewProjection viewProjection_;
 
-	//行列の掛け算
+	// 行列の掛け算
 	Matrix4x4 Multiply(const Matrix4x4& a, const Matrix4x4& b);
-
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
