@@ -8,6 +8,7 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include <vector> //可変個配列用
+#include "DebugCamera.h"//デバッグカメラ用
 
 /// <summary>
 /// ゲームシーン
@@ -48,6 +49,12 @@ public: // メンバ関数
 
 	// 行列の掛け算
 	Matrix4x4 Multiply(const Matrix4x4& a, const Matrix4x4& b);
+
+	//デバッグカメラ
+	DebugCamera* debugCamera_ = nullptr;
+	//デバッグカメラ有効
+	bool isDebugCameraActive_ = false;
+
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
