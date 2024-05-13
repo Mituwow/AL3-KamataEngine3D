@@ -8,6 +8,7 @@ GameScene::GameScene() {}
 GameScene::~GameScene() {
 	delete blockModel_;
 	delete debugCamera_;
+	delete skydome_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
@@ -70,6 +71,12 @@ void GameScene::Initialize() {
 
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
+	
+
+	//天球の生成
+	skydome_ = new Skydome();
+	skydome_->Initialize();
+	skydome_->modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 }
 
 void GameScene::Update() {
@@ -131,13 +138,12 @@ void GameScene::Update() {
 		}
 	}
 
+	skydome_->Update();
 	
-
+	//デバッグカメラのon/off
 	if (input_->TriggerKey(DIK_SPACE)) {
 		isDebugCameraActive_ ^= true;
 	}
-
-
 	//カメラの処理
 	if (isDebugCameraActive_) {
 		debugCamera_->Update();
@@ -177,6 +183,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
+
+	skydome_->Draw();
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			if (!worldTransformBlock) {

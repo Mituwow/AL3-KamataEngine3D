@@ -14,8 +14,6 @@ public:
 	void Draw();
 		
 	ViewProjection viewProjection_;
-
-private:
 	WorldTransform worldTransform_;
-	Model* model_ = nullptr;
+	Model* modelSkydome_ = nullptr;
 };

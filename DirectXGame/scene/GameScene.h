@@ -9,6 +9,7 @@
 #include "WorldTransform.h"
 #include <vector> //可変個配列用
 #include "DebugCamera.h"//デバッグカメラ用
+#include "Skydome.h"
 
 /// <summary>
 /// ゲームシーン
@@ -55,6 +56,9 @@ public: // メンバ関数
 	//デバッグカメラ有効
 	bool isDebugCameraActive_ = false;
 
+	//天球
+	Skydome* skydome_ = nullptr;
+	
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
