@@ -69,7 +69,7 @@ void GameScene::Initialize() {
 	}
 
 	// デバッグカメラの生成
-	debugCamera_ = new DebugCamera(1280, 720);
+	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 }
 
 void GameScene::Update() {
@@ -131,20 +131,18 @@ void GameScene::Update() {
 		}
 	}
 
-#ifdef DEBUG
-	if (input_->TriggerKey(DIK_SPACE)) {
-		isDebugCameraActive_ = true;
-	}
-#endif
+	
 
-	////カメラの処理
+	if (input_->TriggerKey(DIK_SPACE)) {
+		isDebugCameraActive_ ^= true;
+	}
+
+
+	//カメラの処理
 	if (isDebugCameraActive_) {
 		debugCamera_->Update();
-		//------------------------------------------
-		//
-		// ここのやつがわかんない
-		// 
-		//------------------------------------------
+		viewProjection_.matView = debugCamera_->GetViewProjection().matView;
+		viewProjection_.matProjection = debugCamera_->GetViewProjection().matProjection;
 		// ビュープロジェクション行列の転送
 		viewProjection_.TransferMatrix();
 	} else {
@@ -187,6 +185,7 @@ void GameScene::Draw() {
 			blockModel_->Draw(*worldTransformBlock, viewProjection_);
 		}
 	}
+		
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
