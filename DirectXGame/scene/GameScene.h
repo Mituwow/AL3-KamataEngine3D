@@ -42,6 +42,7 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
+
 	// ブロックのモデル
 	Model* blockModel_ = nullptr;
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;

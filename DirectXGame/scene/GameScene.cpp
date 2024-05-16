@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "Skydome.h"
 #include "TextureManager.h"
 #include <cassert>
 #include <cmath>
@@ -18,7 +19,7 @@ GameScene::~GameScene() {
 }
 
 Matrix4x4 GameScene::Multiply(const Matrix4x4& a, const Matrix4x4& b) {
-	Matrix4x4 result;
+	Matrix4x4 result = {0};
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			result.m[i][j] = a.m[i][0] * b.m[0][j] + a.m[i][1] * b.m[1][j] + a.m[i][2] * b.m[2][j] + a.m[i][3] * b.m[3][j];
@@ -71,9 +72,8 @@ void GameScene::Initialize() {
 
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
-	
 
-	//天球の生成
+	// 天球の生成
 	skydome_ = new Skydome();
 	skydome_->Initialize();
 	skydome_->modelSkydome_ = Model::CreateFromOBJ("skydome", true);
@@ -86,7 +86,6 @@ void GameScene::Update() {
 			if (!worldTransformBlock) {
 				continue;
 			}
-
 			// 拡縮行列の作成
 			Matrix4x4 scaleMatrix = {0};
 			scaleMatrix.m[0][0] = worldTransformBlock->scale_.x;
@@ -133,18 +132,71 @@ void GameScene::Update() {
 			translationMatrix.m[3][3] = 1;
 			// すべてを掛け合わせてワールド行列に代入
 			worldTransformBlock->matWorld_ = Multiply(scaleMatrix, Multiply(rotateXYZMatrix, translationMatrix));
+
 			// 定数バッファに転送する
 			worldTransformBlock->TransferMatrix();
 		}
 	}
+	for (int i = 0; i < 1; i++) {
+
+		// 拡縮行列の作成
+		Matrix4x4 scaleMatrix = {0};
+		scaleMatrix.m[0][0] = skydome_->worldTransform_.scale_.x;
+		scaleMatrix.m[1][1] = skydome_->worldTransform_.scale_.y;
+		scaleMatrix.m[2][2] = skydome_->worldTransform_.scale_.z;
+		scaleMatrix.m[3][3] = 1;
+
+		// XYZ軸それぞれの回転行列の作成(これをヘッダーにまとめて呼びやすくするとなお良し)
+		// X
+		Matrix4x4 rotateXMatrix = {0};
+		rotateXMatrix.m[0][0] = 1;
+		rotateXMatrix.m[1][1] = std::cos(skydome_->worldTransform_.rotation_.x);
+		rotateXMatrix.m[1][2] = std::sin(skydome_->worldTransform_.rotation_.x);
+		rotateXMatrix.m[2][1] = -std::sin(skydome_->worldTransform_.rotation_.x);
+		rotateXMatrix.m[2][2] = std::cos(skydome_->worldTransform_.rotation_.x);
+		rotateXMatrix.m[3][3] = 1;
+		// Y
+		Matrix4x4 rotateYMatrix = {0};
+		rotateYMatrix.m[0][0] = std::cos(skydome_->worldTransform_.rotation_.y);
+		rotateYMatrix.m[0][2] = -std::sin(skydome_->worldTransform_.rotation_.y);
+		rotateYMatrix.m[1][1] = 1;
+		rotateYMatrix.m[2][0] = std::sin(skydome_->worldTransform_.rotation_.y);
+		rotateYMatrix.m[2][2] = std::cos(skydome_->worldTransform_.rotation_.y);
+		rotateYMatrix.m[3][3] = 1;
+		// Z
+		Matrix4x4 rotateZMatrix = {0};
+		rotateZMatrix.m[0][0] = std::cos(skydome_->worldTransform_.rotation_.z);
+		rotateZMatrix.m[0][1] = std::sin(skydome_->worldTransform_.rotation_.z);
+		rotateZMatrix.m[1][0] = -std::sin(skydome_->worldTransform_.rotation_.z);
+		rotateZMatrix.m[1][1] = std::cos(skydome_->worldTransform_.rotation_.z);
+		rotateZMatrix.m[2][2] = 1;
+		rotateZMatrix.m[3][3] = 1;
+		// XYZ回転行列の合成
+		Matrix4x4 rotateXYZMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
+
+		// 平行移動行列の作成
+		Matrix4x4 translationMatrix = {0};
+		translationMatrix.m[0][0] = 1;
+		translationMatrix.m[1][1] = 1;
+		translationMatrix.m[2][2] = 1;
+		translationMatrix.m[3][0] = skydome_->worldTransform_.translation_.x;
+		translationMatrix.m[3][1] = skydome_->worldTransform_.translation_.y;
+		translationMatrix.m[3][2] = skydome_->worldTransform_.translation_.z;
+		translationMatrix.m[3][3] = 1;
+		// すべてを掛け合わせてワールド行列に代入
+		skydome_->worldTransform_.matWorld_ = Multiply(scaleMatrix, Multiply(rotateXYZMatrix, translationMatrix));
+
+		// 定数バッファに転送する
+		skydome_->worldTransform_.TransferMatrix();
+	}
 
 	skydome_->Update();
-	
-	//デバッグカメラのon/off
+
+	// デバッグカメラのon/off
 	if (input_->TriggerKey(DIK_SPACE)) {
 		isDebugCameraActive_ ^= true;
 	}
-	//カメラの処理
+	// カメラの処理
 	if (isDebugCameraActive_) {
 		debugCamera_->Update();
 		viewProjection_.matView = debugCamera_->GetViewProjection().matView;
@@ -185,6 +237,7 @@ void GameScene::Draw() {
 	/// </summary>
 
 	skydome_->Draw();
+
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			if (!worldTransformBlock) {
@@ -192,7 +245,7 @@ void GameScene::Draw() {
 			}
 			blockModel_->Draw(*worldTransformBlock, viewProjection_);
 		}
-	}		
+	}
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
