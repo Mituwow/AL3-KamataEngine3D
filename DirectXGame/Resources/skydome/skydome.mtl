@@ -1,13 +1,12 @@
-# Blender 4.1.1 MTL File: 'skydome.blend'
+# Blender 4.1.1 MTL File: 'Skydome.blend'
 # www.blender.org
 
-newmtl マテリアル
-Ns 900.000000
+newmtl Skydome
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.000000 0.000000 0.000000
-Ks 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
-Ni 0.000000
+Ni 1.500000
 d 1.000000
-illum 1
-map_Kd AL3-KamataEngine3D/DirectXGame/Resources/skydome/skydome.png
+illum 2
+map_Kd C:/Users/syado/OneDrive/デスクトップ/skydome.png

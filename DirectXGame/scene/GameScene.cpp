@@ -192,8 +192,7 @@ void GameScene::Draw() {
 			}
 			blockModel_->Draw(*worldTransformBlock, viewProjection_);
 		}
-	}
-		
+	}		
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
