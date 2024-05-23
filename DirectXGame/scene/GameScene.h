@@ -10,6 +10,7 @@
 #include <vector> //可変個配列用
 #include "DebugCamera.h"//デバッグカメラ用
 #include "Skydome.h"
+#include "MapChipField.h"
 
 /// <summary>
 /// ゲームシーン
@@ -59,7 +60,12 @@ public: // メンバ関数
 
 	//天球
 	Skydome* skydome_ = nullptr;
+
+	//マップチップフィールド
+	MapChipField* mapChipField_;
 	
+	//表示ブロック
+	void GenerateBlocks();
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
