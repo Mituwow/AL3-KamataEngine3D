@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "Skydome.h"
+#include "Player.h"
 #include "TextureManager.h"
 #include <cassert>
 #include <cmath>
@@ -80,6 +81,12 @@ void GameScene::Initialize() {
 
 	//表示ブロックの生成
 	GenerateBlocks();
+
+	//自機
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2,10);
+	player_ = new Player();
+	player_->Initialize(player_->modelPlayer_,playerPosition);
+	player_->modelPlayer_ = Model::CreateFromOBJ("player", true);
 }
 
 void GameScene::Update() {
@@ -211,6 +218,8 @@ void GameScene::Update() {
 		// ビュープロジェクション行列の更新と転送
 		viewProjection_.UpdateMatrix();
 	}
+
+	player_->Update();
 }
 
 void GameScene::Draw() {
@@ -241,6 +250,8 @@ void GameScene::Draw() {
 	/// </summary>
 
 	skydome_->Draw();
+	player_->Draw();
+	
 
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
