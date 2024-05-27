@@ -24,7 +24,7 @@ void Player::Update() {
 	worldTransform_.translation_.x += velocity_.x;
 	worldTransform_.translation_.y += velocity_.y;
 	worldTransform_.translation_.z += velocity_.z;
-	worldTransform_.UpdateMatrix();
+	//worldTransform_.UpdateMatrix();
 
 	if (onGround_) {
 

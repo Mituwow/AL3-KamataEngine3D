@@ -18,7 +18,7 @@ public:
 	void Update();
 
 	Model* modelPlayer_ = nullptr;
-	WorldTransform worldTransform_;
+	WorldTransform worldTransform_ = {};
 	ViewProjection viewProjection_;
 	Vector3 velocity_ = {};
 
