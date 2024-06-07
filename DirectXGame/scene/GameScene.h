@@ -12,6 +12,7 @@
 #include "Skydome.h"
 #include "MapChipField.h"
 #include "Player.h"
+#include "CameraController.h"
 
 /// <summary>
 /// ゲームシーン
@@ -63,13 +64,16 @@ public: // メンバ関数
 	Skydome* skydome_ = nullptr;
 
 	//マップチップフィールド
-	MapChipField* mapChipField_;
+	MapChipField* mapChipField_ = nullptr;
 	
 	//表示ブロック
 	void GenerateBlocks();
 
 	//自機
 	Player* player_ = nullptr;
+
+	//カメラコントローラー
+	CameraController* cameraController_ = nullptr;
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;

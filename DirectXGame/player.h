@@ -13,22 +13,20 @@ class Player {
 public:
 	Player();
 	~Player();
-	void Initialize(Model* model, const Vector3& position);
-	void Draw();
+	void Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position);
 	void Update();
+	void Draw();
 
-	Model* modelPlayer_ = nullptr;
-	WorldTransform worldTransform_ = {};
-	ViewProjection viewProjection_;
-	Vector3 velocity_ = {};
+	ViewProjection* GetViewProjection() { return viewProjection_; }
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
 
-	static inline const float kAcceralation = 0.1f;
+	static inline const float kAcceralation = 0.01f;
 	static inline const float kAttenuation = 0.1f;
-	static inline const float kLimitRunSpeed = 10.0f;
+	static inline const float kLimitRunSpeed = 5.0f;
 	static inline const float kTimeTurn = 0.3f;
 	static inline const float kGravityAcceralation = 0.2f;
 	static inline const float kLimitFallSpeed = 10.0f;
-	static inline const float kJumpAccelaration = 5.0f;
+	static inline const float kJumpAccelaration = 2.0f;
 	static inline const float kAttenuationLanding = 0.1f;
 
 	enum class LRDirection {
@@ -42,4 +40,9 @@ public:
 
 	bool onGround_ = true;
 
+private:
+	Model* modelPlayer_ = nullptr;
+	Vector3 velocity_ = {};
+	WorldTransform worldTransform_;
+	ViewProjection* viewProjection_;
 };

@@ -1,6 +1,6 @@
 #include "GameScene.h"
-#include "Skydome.h"
 #include "Player.h"
+#include "Skydome.h"
 #include "TextureManager.h"
 #include <cassert>
 #include <cmath>
@@ -48,15 +48,16 @@ void GameScene::GenerateBlocks() {
 	// キューブの生成
 	for (uint32_t i = 0; i < numBlockVirtical; i++) {
 		for (uint32_t j = 0; j < numBlockHorizontal; j++) {
-			if (mapChipField_->GetMapChipTypeByIndex(j,i) == MapChipType::kBlock) {
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 
-				WorldTransform* worldTransform = new WorldTransform(); 
+				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();
 				worldTransformBlocks_[i][j] = worldTransform;
-				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j,i);
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
 		}
-	}}
+	}
+}
 
 void GameScene::Initialize() {
 
@@ -75,18 +76,24 @@ void GameScene::Initialize() {
 	skydome_->Initialize();
 	skydome_->modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 
-	//マップチップ
+	// マップチップ
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 
-	//表示ブロックの生成
+	// 表示ブロックの生成
 	GenerateBlocks();
 
-	//自機
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2,10);
+	// 自機
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
 	player_ = new Player();
-	player_->Initialize(player_->modelPlayer_,playerPosition);
-	player_->modelPlayer_ = Model::CreateFromOBJ("player", true);
+	player_->Initialize(Model::CreateFromOBJ("player", true), &viewProjection_, playerPosition);
+	//	player_->modelPlayer_ = ;
+
+	// カメラコントローラーの初期化
+	cameraController_ = new CameraController();
+	cameraController_->Initialize();
+	cameraController_->SetTarget(player_);
+	cameraController_->Reset();
 }
 
 void GameScene::Update() {
@@ -203,10 +210,14 @@ void GameScene::Update() {
 
 	skydome_->Update();
 
+#ifdef DEBUG
 	// デバッグカメラのon/off
 	if (input_->TriggerKey(DIK_SPACE)) {
 		isDebugCameraActive_ ^= true;
 	}
+#endif // DEBUG
+
+
 	// カメラの処理
 	if (isDebugCameraActive_) {
 		debugCamera_->Update();
@@ -217,9 +228,13 @@ void GameScene::Update() {
 	} else {
 		// ビュープロジェクション行列の更新と転送
 		viewProjection_.UpdateMatrix();
+		viewProjection_.matView = cameraController_->GetViewProjection().matView;
+		viewProjection_.matProjection = cameraController_->GetViewProjection().matProjection;
+		viewProjection_.TransferMatrix();
 	}
 
 	player_->Update();
+	cameraController_->Update();
 }
 
 void GameScene::Draw() {
@@ -250,8 +265,6 @@ void GameScene::Draw() {
 	/// </summary>
 
 	skydome_->Draw();
-	player_->Draw();
-	
 
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
@@ -261,6 +274,7 @@ void GameScene::Draw() {
 			blockModel_->Draw(*worldTransformBlock, viewProjection_);
 		}
 	}
+	player_->Draw();
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
