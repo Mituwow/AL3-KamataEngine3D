@@ -1,13 +1,12 @@
 #pragma once
-#include <stdint.h>
-#include <vector>
-#include <map>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <cassert>
 #include <Vector3.h>
-
+#include <cassert>
+#include <fstream>
+#include <map>
+#include <sstream>
+#include <stdint.h>
+#include <string>
+#include <vector>
 
 enum class MapChipType {
 	kBlank,
@@ -19,13 +18,12 @@ struct MapChipData {
 };
 
 class MapChipField {
-	
-public:
 
-	//block size
+public:
+	// block size
 	static inline const float kBlockWidth = 2.0f;
 	static inline const float kBlockHeight = 2.0f;
-	//block num
+	// block num
 	static inline const uint32_t kNumBlockVirtical = 20;
 	static inline const uint32_t kNumBlockHorizontal = 100;
 
@@ -38,4 +36,11 @@ public:
 
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
+	struct IndexSet {
+		uint32_t xIndex;
+		uint32_t yIndex;
+	};
+	IndexSet index{0, 0};
+
+	IndexSet GetMapChipIndexSetByPosition(const Vector3& position);
 };

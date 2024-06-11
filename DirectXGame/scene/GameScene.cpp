@@ -87,7 +87,7 @@ void GameScene::Initialize() {
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
 	player_ = new Player();
 	player_->Initialize(Model::CreateFromOBJ("player", true), &viewProjection_, playerPosition);
-	//	player_->modelPlayer_ = ;
+	player_->SetMapChipField(mapChipField_);
 
 	// カメラコントローラーの初期化
 	cameraController_ = new CameraController();
