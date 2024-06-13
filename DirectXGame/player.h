@@ -26,12 +26,13 @@ public:
 	static inline const float kAttenuation = 0.1f;
 	static inline const float kLimitRunSpeed = 5.0f;
 	static inline const float kTimeTurn = 1.0f;
-	static inline const float kGravityAcceralation = 0.1f;
+	static inline const float kGravityAcceralation = 0.09f;
 	static inline const float kLimitFallSpeed = 5.0f;
-	static inline const float kJumpAccelaration = 1.0f;
+	static inline const float kJumpAccelaration = 1.5f;
 	static inline const float kAttenuationLanding = 0.1f;
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
+	static inline const float kBlank = 0.5f;
 
 	enum class LRDirection {
 		kRight,
@@ -51,7 +52,7 @@ public:
 		bool landing = false;
 		bool hitWall = false;
 		Vector3 move;
-	};
+	};	
 	enum Corner {
 		kRightBottom,
 		kLeftBottom,

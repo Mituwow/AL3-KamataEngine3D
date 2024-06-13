@@ -43,4 +43,12 @@ public:
 	IndexSet index{0, 0};
 
 	IndexSet GetMapChipIndexSetByPosition(const Vector3& position);
+
+	struct Rect {
+		float top;
+		float bottom;
+		float left;
+		float right;
+	};
+	Rect GetRectByIndex(uint32_t xIndex,uint32_t yIndex);
 };

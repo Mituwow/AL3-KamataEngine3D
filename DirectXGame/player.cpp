@@ -98,6 +98,9 @@ void Player::Update() {
 		float nowRatationY = std::lerp(turnFirstRotationY_, destinationRatationY, easing);
 		worldTransform_.rotation_.y = nowRatationY;
 	}
+	CollisionMapInfo collisionMapInfo;
+	collisionMapInfo.move = velocity_;
+	CollisionMap(collisionMapInfo);
 }
 
 void Player::Draw() { modelPlayer_->Draw(worldTransform_, *viewProjection_); }
@@ -114,42 +117,49 @@ void Player::CollisionMap(CollisionMapInfo& info) {
 }
 
 void Player::CollisionMapTop(CollisionMapInfo& info) {
-	//上昇していなければ早期リターン
+	// 上昇していなければ早期リターン
 	if (info.move.y <= 0) {
 		return;
 	}
-	//移動後の４つの角の座標
+	// 移動後の４つの角の座標
 	std::array<Vector3, static_cast<uint32_t>(Corner::kNumCorner)> positionsNew;
 	for (uint32_t i = 0; i < positionsNew.size(); ++i) {
 		positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
 	}
 
 	MapChipType mapChipType;
-	//真上の当たり判定
-	bool hit = false;
-	//左上の当たり判定
 	MapChipField::IndexSet indexSet;
+	// 真上の当たり判定
+	bool hit = false;
+	// 左上の当たり判定
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	if (mapChipType == MapChipType::kBlock) {
-
 		hit = true;
 	}
-	//右上も同様に
+	// 右上も同様に
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop]);
-	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	if (mapChipType == MapChipType::kBlock) {
-
 		hit = true;
 	}
+	// hit時
 	if (hit) {
-		return;
+		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move);
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		float moveY = rect.bottom - worldTransform_.translation_.y;
+
+		info.move.y = std::max(0.0f, moveY);
+		info.ceiling = true;
 	}
-	
+	// 天井に当たった?
+	if (info.ceiling) {
+		worldTransform_.translation_ += info.move;
+		velocity_.y = 0;
+	}
 }
 
 #pragma warning(push)
-#pragma warning(disable:4100)
+#pragma warning(disable : 4100)
 void Player::CollisionMapBottom(CollisionMapInfo& info) {}
 void Player::CollisionMapLeft(CollisionMapInfo& info) {}
 void Player::CollisionMapRight(CollisionMapInfo& info) {}
