@@ -142,11 +142,18 @@ void Player::CollisionMapTop(CollisionMapInfo& info) {
 
 		hit = true;
 	}
+	if (hit) {
+		return;
+	}
 	
 }
+
+#pragma warning(push)
+#pragma warning(disable:4100)
 void Player::CollisionMapBottom(CollisionMapInfo& info) {}
 void Player::CollisionMapLeft(CollisionMapInfo& info) {}
 void Player::CollisionMapRight(CollisionMapInfo& info) {}
+#pragma warning(pop)
 
 Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 	Vector3 offsetTable[kNumCorner] = {
@@ -156,9 +163,7 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 	    {-kWidth / 2.0f, +kHeight / 2.0f, 0}  //  左上
 	};
 	Vector3 result;
-	result.x = center.x + offsetTable[static_cast<uint32_t>(corner)].x;
-	result.y = center.x + offsetTable[static_cast<uint32_t>(corner)].y;
-	result.z = center.x + offsetTable[static_cast<uint32_t>(corner)].z;
+	result = center + offsetTable[static_cast<uint32_t>(corner)];
 
 	return result;
 }
