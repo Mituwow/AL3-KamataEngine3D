@@ -8,18 +8,16 @@
 #include <string>
 #include <vector>
 
-enum class MapChipType {
-	kBlank,
-	kBlock,
-};
-
-struct MapChipData {
-	std::vector<std::vector<MapChipType>> data;
-};
-
 class MapChipField {
 
 public:
+	enum class MapChipType {
+		kBlank,
+		kBlock,
+	};
+	struct MapChipData {
+		std::vector<std::vector<MapChipType>> data;
+	};
 	// block size
 	static inline const float kBlockWidth = 2.0f;
 	static inline const float kBlockHeight = 2.0f;
@@ -50,5 +48,5 @@ public:
 		float left;
 		float right;
 	};
-	Rect GetRectByIndex(uint32_t xIndex,uint32_t yIndex);
+	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
 };

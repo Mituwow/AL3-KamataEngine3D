@@ -25,6 +25,8 @@ void Player::Update() {
 
 	bool landing = false;
 
+	Input* input = Input::GetInstance();
+
 	if (velocity_.y < 0) {
 		if (worldTransform_.translation_.y <= 1.0f) {
 			landing = true;
@@ -35,10 +37,14 @@ void Player::Update() {
 		if (velocity_.y > 0.0f) {
 			onGround_ = false;
 		}
+		bool isLeftKey = input->PushKey(DIK_LEFT);
+		bool isRightKey = input->PushKey(DIK_RIGHT);
+		// bool isJumpKey = input->PushKey(DIK_UP) || input->PushKey(DIK_SPACE);
+
 		// 移動入力
-		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
+		if (isLeftKey || isRightKey) {
 			Vector3 acceralation = {};
-			if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
+			if (isRightKey) {
 				if (velocity_.x < 0.0f) {
 					velocity_.x *= (1.0f - kAttenuation);
 				}
@@ -46,7 +52,7 @@ void Player::Update() {
 				if (lrDirection_ != LRDirection::kRight) {
 					lrDirection_ = LRDirection::kRight;
 				}
-			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
+			} else if (isLeftKey) {
 				if (velocity_.x > 0.0f) {
 					velocity_.x *= (1.0f - kAttenuation);
 				}
@@ -85,11 +91,15 @@ void Player::Update() {
 		}
 	}
 
+	CollisionMapInfo collisionMapInfo;
+	collisionMapInfo.move = velocity_;
+	CollisionMap(collisionMapInfo);
+
+	// 旋回制御
 	float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
 	float destinationRatationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 	worldTransform_.rotation_.y = destinationRatationY;
 
-	// 旋回制御
 	if (turnTimer_ > 0) {
 		turnTimer_ -= 1.0f / 60;
 
@@ -98,9 +108,6 @@ void Player::Update() {
 		float nowRatationY = std::lerp(turnFirstRotationY_, destinationRatationY, easing);
 		worldTransform_.rotation_.y = nowRatationY;
 	}
-	CollisionMapInfo collisionMapInfo;
-	collisionMapInfo.move = velocity_;
-	CollisionMap(collisionMapInfo);
 }
 
 void Player::Draw() { modelPlayer_->Draw(worldTransform_, *viewProjection_); }
@@ -127,26 +134,27 @@ void Player::CollisionMapTop(CollisionMapInfo& info) {
 		positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
 	}
 
-	MapChipType mapChipType;
+	MapChipField::MapChipType mapChipType;
 	MapChipField::IndexSet indexSet;
 	// 真上の当たり判定
 	bool hit = false;
 	// 左上の当たり判定
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[0]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-	if (mapChipType == MapChipType::kBlock) {
+	if (mapChipType == MapChipField::MapChipType::kBlock) {
 		hit = true;
 	}
 	// 右上も同様に
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop]);
-	if (mapChipType == MapChipType::kBlock) {
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[int(Corner::kRightTop)]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	if (mapChipType == MapChipField::MapChipType::kBlock) {
 		hit = true;
 	}
 	// hit時
 	if (hit) {
 		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move);
 		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-		float moveY = rect.bottom - worldTransform_.translation_.y;
+		float moveY = worldTransform_.translation_.y - rect.bottom;
 
 		info.move.y = std::max(0.0f, moveY);
 		info.ceiling = true;
@@ -166,14 +174,13 @@ void Player::CollisionMapRight(CollisionMapInfo& info) {}
 #pragma warning(pop)
 
 Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
-	Vector3 offsetTable[kNumCorner] = {
-	    {+kWidth / 2.0f, -kHeight / 2.0f, 0}, //  右下
-	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, //  左下
-	    {+kWidth / 2.0f, +kHeight / 2.0f, 0}, //  右上
-	    {-kWidth / 2.0f, +kHeight / 2.0f, 0}  //  左上
-	};
-	Vector3 result;
-	result = center + offsetTable[static_cast<uint32_t>(corner)];
 
-	return result;
+	Vector3 offsetTable[kNumCorner] = {
+	    {kWidth / 2.0f, -kHeight / 2.0f, 0}, //  右下
+	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, //  左下
+	    {kWidth / 2.0f, kHeight / 2.0f, 0}, //  右上
+	    {-kWidth / 2.0f, kHeight / 2.0f, 0}  //  左上
+	};
+
+	return center + offsetTable[static_cast<uint32_t>(corner)];
 }

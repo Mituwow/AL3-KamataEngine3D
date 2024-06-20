@@ -7,9 +7,9 @@
 
 namespace {
 
-std::map<std::string, MapChipType> mapChpTable = {
-    {"0", MapChipType::kBlank},
-    {"1", MapChipType::kBlock},
+std::map<std::string, MapChipField::MapChipType> mapChpTable = {
+    {"0", MapChipField::MapChipType::kBlank},
+    {"1", MapChipField::MapChipType::kBlock},
 };
 
 }
@@ -54,7 +54,7 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	}
 }
 
-MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
+MapChipField::MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
 
 	if (xIndex < 0 || kNumBlockHorizontal - 1 < xIndex) {
 		return MapChipType::kBlank;
@@ -72,24 +72,20 @@ Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex
 MapChipField::IndexSet MapChipField::GetMapChipIndexSetByPosition(const Vector3& position) {
 	IndexSet indexSet = {};
 	indexSet.xIndex = static_cast<uint32_t>((position.x + kBlockWidth / 2) / kBlockWidth);
-	indexSet.yIndex = static_cast<uint32_t>((position.y - kBlockHeight / 2) / kBlockHeight);
+	indexSet.yIndex = static_cast<uint32_t>((position.y + kBlockHeight / 2) / kBlockHeight);
 
-	int32_t maxIndexY = kNumBlockVirtical - 1;
-	index.yIndex = maxIndexY - index.yIndex;
-
-	indexSet.xIndex = index.xIndex;
-	indexSet.yIndex = index.yIndex;
+	indexSet.yIndex = kNumBlockVirtical - 1 - indexSet.yIndex;
 
 	return indexSet;
 }
 
 MapChipField::Rect MapChipField::GetRectByIndex(uint32_t xIndex, uint32_t yIndex) {
-	
+
 	Vector3 center = GetMapChipPositionByIndex(xIndex, yIndex);
 
 	Rect rect;
 	rect.top = center.y + kBlockHeight / 2.0f;
-	rect.bottom = center.y - kBlockHeight / 2.0f;	
+	rect.bottom = center.y - kBlockHeight / 2.0f;
 	rect.left = center.x - kBlockWidth / 2.0f;
 	rect.right = center.x + kBlockWidth / 2.0f;
 

@@ -48,7 +48,7 @@ void GameScene::GenerateBlocks() {
 	// キューブの生成
 	for (uint32_t i = 0; i < numBlockVirtical; i++) {
 		for (uint32_t j = 0; j < numBlockHorizontal; j++) {
-			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipField::MapChipType::kBlock) {
 
 				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();
