@@ -26,13 +26,13 @@ public:
 	static inline const float kAttenuation = 0.1f;
 	static inline const float kLimitRunSpeed = 5.0f;
 	static inline const float kTimeTurn = 1.0f;
-	static inline const float kGravityAcceralation = 0.09f;
-	static inline const float kLimitFallSpeed = 5.0f;
+	static inline const float kGravityAcceralation = 0.1f;
+	static inline const float kLimitFallSpeed = 1.0f;
 	static inline const float kJumpAccelaration = 1.5f;
 	static inline const float kAttenuationLanding = 0.1f;
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
-	static inline const float kBlank = 0.5f;
+	static inline const float kBlank = 0.8f;
 
 	enum class LRDirection {
 		kRight,
@@ -75,6 +75,8 @@ private:
 	void CollisionMapBottom(CollisionMapInfo& info);
 	void CollisionMapLeft(CollisionMapInfo& info);
 	void CollisionMapRight(CollisionMapInfo& info);
+
+	void OnGroundSwitch(CollisionMapInfo& info);
 
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
 };

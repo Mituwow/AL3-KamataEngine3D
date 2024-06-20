@@ -18,7 +18,6 @@ public:
 
 	void SetTarget(Player* target) { target_ = target; }
 	ViewProjection& GetViewProjection() { return viewProjection_; }
-
 	Vector3 Lerp(Vector3 start, Vector3 end, float t) {
 		Vector3 result;
 		result.x = (1 - t) * start.x + t * end.x;
@@ -34,9 +33,12 @@ public:
 		float bottom = 0.0f;
 		float top = 1.0f;
 	};
-
 	Rect movableArea_ = {5, 100, 5, 100};
 	void SetMovableArea(Rect area) { movableArea_ = area; }
+	static inline const uint32_t kMovableLimitStartX = 17;
+	static inline const uint32_t kMovableLimitEndX = 85;
+	static inline const uint32_t kMovableLimitStartY = 10;
+	static inline const uint32_t kMovableLimitEndY = 25;
 
 private:
 	ViewProjection viewProjection_;

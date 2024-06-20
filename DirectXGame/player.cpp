@@ -39,7 +39,6 @@ void Player::Update() {
 		}
 		bool isLeftKey = input->PushKey(DIK_LEFT);
 		bool isRightKey = input->PushKey(DIK_RIGHT);
-		// bool isJumpKey = input->PushKey(DIK_UP) || input->PushKey(DIK_SPACE);
 
 		// 移動入力
 		if (isLeftKey || isRightKey) {
@@ -121,6 +120,8 @@ void Player::CollisionMap(CollisionMapInfo& info) {
 	CollisionMapLeft(info);
 	// 右
 	CollisionMapRight(info);
+	//接地している場合
+	OnGroundSwitch(info);
 }
 
 void Player::CollisionMapTop(CollisionMapInfo& info) {
@@ -139,7 +140,7 @@ void Player::CollisionMapTop(CollisionMapInfo& info) {
 	// 真上の当たり判定
 	bool hit = false;
 	// 左上の当たり判定
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[0]);
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	if (mapChipType == MapChipField::MapChipType::kBlock) {
 		hit = true;
@@ -165,21 +166,98 @@ void Player::CollisionMapTop(CollisionMapInfo& info) {
 		velocity_.y = 0;
 	}
 }
+void Player::CollisionMapBottom(CollisionMapInfo& info) {
+	if (info.move.y >= 0) {
+		return;
+	}
+	// 移動後の４つの角の座標
+	std::array<Vector3, static_cast<uint32_t>(Corner::kNumCorner)> positionsNew;
+	for (uint32_t i = 0; i < positionsNew.size(); ++i) {
+		positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
+	}
+	MapChipField::MapChipType mapChipType;
+	MapChipField::IndexSet indexSet;
+	// 真下の当たり判定
+	bool hit = false;
+	// 左下の当たり判定
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	if (mapChipType == MapChipField::MapChipType::kBlock) {
+		hit = true;
+	}
+	// 右下の当たり判定
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	if (mapChipType == MapChipField::MapChipType::kBlock) {
+		hit = true;
+	}
+	// hit時
+	if (hit) {
+		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move);
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		float moveY = worldTransform_.translation_.y + rect.bottom;
+
+		info.move.y = std::min(0.0f, moveY);
+		info.landing = true;
+	}
+	if (info.landing) {
+		worldTransform_.translation_ -= info.move;
+		velocity_.y = 0;
+	}
+}
 
 #pragma warning(push)
 #pragma warning(disable : 4100)
-void Player::CollisionMapBottom(CollisionMapInfo& info) {}
 void Player::CollisionMapLeft(CollisionMapInfo& info) {}
 void Player::CollisionMapRight(CollisionMapInfo& info) {}
 #pragma warning(pop)
 
+void Player::OnGroundSwitch(CollisionMapInfo& info) {
+	if (onGround_) {
+		if (velocity_.y > 0.0f) {
+			onGround_ = false;
+		} else {
+			// 落下判定
+			//  移動後の４つの角の座標
+			std::array<Vector3, static_cast<uint32_t>(Corner::kNumCorner)> positionsNew;
+			for (uint32_t i = 0; i < positionsNew.size(); ++i) {
+				positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
+			}
+			MapChipField::MapChipType mapChipType;
+			MapChipField::IndexSet indexSet;
+			bool hit = false;
+			// 左下の当たり判定
+			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom] + Vector3(0, -kBlank, 0));
+			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+			if (mapChipType == MapChipField::MapChipType::kBlock) {
+				hit = true;
+			}
+			// 右下の当たり判定
+			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom] + Vector3(0, -kBlank, 0));
+			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+			if (mapChipType == MapChipField::MapChipType::kBlock) {
+				hit = true;
+			}
+			if (!hit) {
+				onGround_ = false;
+			}
+		}
+	} else {
+		if (info.landing) {
+			onGround_ = true;
+			velocity_.x *= (1.0f - kAttenuationLanding);
+			velocity_.y = 0.0f;
+		}
+	}
+}
+
 Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 
 	Vector3 offsetTable[kNumCorner] = {
-	    {kWidth / 2.0f, -kHeight / 2.0f, 0}, //  右下
+	    {kWidth / 2.0f,  -kHeight / 2.0f, 0}, //  右下
 	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, //  左下
-	    {kWidth / 2.0f, kHeight / 2.0f, 0}, //  右上
-	    {-kWidth / 2.0f, kHeight / 2.0f, 0}  //  左上
+	    {kWidth / 2.0f,  kHeight / 2.0f,  0}, //  右上
+	    {-kWidth / 2.0f, kHeight / 2.0f,  0}  //  左上
 	};
 
 	return center + offsetTable[static_cast<uint32_t>(corner)];

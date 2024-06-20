@@ -6,7 +6,7 @@
 void CameraController::Initialize() {
 	worldTransform_.Initialize();
 	viewProjection_.Initialize();
-	movableArea_ = {17, 29, 10, 15};
+	movableArea_ = {kMovableLimitStartX, kMovableLimitEndX, kMovableLimitStartY, kMovableLimitEndY};
 }
 
 void CameraController::Update() {
