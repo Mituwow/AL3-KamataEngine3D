@@ -12,6 +12,7 @@
 #include "Skydome.h"
 #include "MapChipField.h"
 #include "Player.h"
+#include "enemy.h"
 #include "CameraController.h"
 
 /// <summary>
@@ -71,6 +72,9 @@ public: // メンバ関数
 
 	//自機
 	Player* player_ = nullptr;
+
+	//敵
+	Enemy* enemy_ = nullptr;
 
 	//カメラコントローラー
 	CameraController* cameraController_ = nullptr;

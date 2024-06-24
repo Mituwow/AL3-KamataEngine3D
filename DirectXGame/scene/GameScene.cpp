@@ -1,5 +1,6 @@
 #include "GameScene.h"
-#include "Player.h"
+#include "player.h"
+#include "enemy.h"
 #include "Skydome.h"
 #include "TextureManager.h"
 #include <cassert>
@@ -16,6 +17,8 @@ GameScene::~GameScene() {
 	delete debugCamera_;
 	delete skydome_;
 	delete mapChipField_;
+	delete player_;
+	delete enemy_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
@@ -88,6 +91,12 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	player_->Initialize(Model::CreateFromOBJ("player", true), &viewProjection_, playerPosition);
 	player_->SetMapChipField(mapChipField_);
+
+	//敵
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(6, 18);
+	enemy_ = new Enemy();
+	enemy_->Initialize(Model::CreateFromOBJ("enemy", true), &viewProjection_, enemyPosition);
+	enemy_->SetMapChipField(mapChipField_);
 
 	// カメラコントローラーの初期化
 	cameraController_ = new CameraController();
@@ -234,6 +243,7 @@ void GameScene::Update() {
 	}
 
 	player_->Update();
+	enemy_->Update();
 	cameraController_->Update();
 }
 
@@ -275,6 +285,7 @@ void GameScene::Draw() {
 		}
 	}
 	player_->Draw();
+	enemy_->Draw();
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();

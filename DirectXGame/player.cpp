@@ -22,7 +22,6 @@ void Player::Update() {
 
 	worldTransform_.translation_ += velocity_;
 	worldTransform_.UpdateMatrix();
-
 	bool landing = false;
 
 	Input* input = Input::GetInstance();
@@ -78,7 +77,8 @@ void Player::Update() {
 			velocity_.y += kJumpAccelaration;
 			onGround_ = false;
 		}
-	} else {
+	}
+	else {
 		velocity_.y -= kGravityAcceralation;
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 
@@ -89,6 +89,7 @@ void Player::Update() {
 			onGround_ = true;
 		}
 	}
+
 
 	CollisionMapInfo collisionMapInfo;
 	collisionMapInfo.move = velocity_;
@@ -120,7 +121,7 @@ void Player::CollisionMap(CollisionMapInfo& info) {
 	CollisionMapLeft(info);
 	// 右
 	CollisionMapRight(info);
-	//接地している場合
+	// 接地している場合
 	OnGroundSwitch(info);
 }
 
@@ -283,7 +284,6 @@ void Player::CollisionMapRight(CollisionMapInfo& info) {
 		velocity_.x = 0;
 	}
 }
-
 
 void Player::OnGroundSwitch(CollisionMapInfo& info) {
 	if (onGround_) {
