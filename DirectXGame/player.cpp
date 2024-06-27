@@ -112,6 +112,15 @@ void Player::Update() {
 
 void Player::Draw() { modelPlayer_->Draw(worldTransform_, *viewProjection_); }
 
+Vector3 Player::GetWorldPosition() { 
+	Vector3 worldPos;
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+
+	return worldPos;
+}
+
 void Player::CollisionMap(CollisionMapInfo& info) {
 	// 上
 	CollisionMapTop(info);
@@ -123,6 +132,12 @@ void Player::CollisionMap(CollisionMapInfo& info) {
 	CollisionMapRight(info);
 	// 接地している場合
 	OnGroundSwitch(info);
+}
+
+Player::AABB Player::GetAABB() {
+	Vector3 worldPos = GetWorldPosition();
+	AABB aabb;
+	aabb.min = {};
 }
 
 void Player::CollisionMapTop(CollisionMapInfo& info) {

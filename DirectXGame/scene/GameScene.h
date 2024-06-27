@@ -74,7 +74,9 @@ public: // メンバ関数
 	Player* player_ = nullptr;
 
 	//敵
-	Enemy* enemy_ = nullptr;
+	
+	std::list<Enemy*> enemies_;
+	static inline const uint32_t kEnemyNum = 3;
 
 	//カメラコントローラー
 	CameraController* cameraController_ = nullptr;

@@ -62,6 +62,15 @@ public:
 		kNumCorner
 	};
 
+	Vector3 GetWorldPosition();
+
+	struct AABB {
+		Vector3 min;
+		Vector3 max;
+	};
+
+	AABB GetAABB(); 
+
 private:
 	Model* modelPlayer_ = nullptr;
 	Vector3 velocity_ = {};
