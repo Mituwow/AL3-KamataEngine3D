@@ -77,8 +77,7 @@ void Player::Update() {
 			velocity_.y += kJumpAccelaration;
 			onGround_ = false;
 		}
-	}
-	else {
+	} else {
 		velocity_.y -= kGravityAcceralation;
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 
@@ -89,7 +88,6 @@ void Player::Update() {
 			onGround_ = true;
 		}
 	}
-
 
 	CollisionMapInfo collisionMapInfo;
 	collisionMapInfo.move = velocity_;
@@ -112,13 +110,18 @@ void Player::Update() {
 
 void Player::Draw() { modelPlayer_->Draw(worldTransform_, *viewProjection_); }
 
-Vector3 Player::GetWorldPosition() { 
+Vector3 Player::GetWorldPosition() {
 	Vector3 worldPos;
 	worldPos.x = worldTransform_.matWorld_.m[3][0];
 	worldPos.y = worldTransform_.matWorld_.m[3][1];
 	worldPos.z = worldTransform_.matWorld_.m[3][2];
 
 	return worldPos;
+}
+
+void Player::OnCollision(const Enemy* enemy) {
+	(void)enemy;
+	velocity_ += Vector3(0.0f, 1.0f, 0.0f);
 }
 
 void Player::CollisionMap(CollisionMapInfo& info) {
@@ -134,10 +137,13 @@ void Player::CollisionMap(CollisionMapInfo& info) {
 	OnGroundSwitch(info);
 }
 
-Player::AABB Player::GetAABB() {
+aabb::AABB Player::GetAABB() {
 	Vector3 worldPos = GetWorldPosition();
-	AABB aabb;
-	aabb.min = {};
+	aabb::AABB aabb;
+	aabb.min = {worldPos.x - kWidth / 2.0f, worldPos.y - kHeight / 2.0f, worldPos.z - kWidth / 2.0f};
+	aabb.max = {worldPos.x + kWidth / 2.0f, worldPos.y + kHeight / 2.0f, worldPos.z + kWidth / 2.0f};
+
+	return aabb;
 }
 
 void Player::CollisionMapTop(CollisionMapInfo& info) {
@@ -211,7 +217,7 @@ void Player::CollisionMapBottom(CollisionMapInfo& info) {
 	if (hit) {
 		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move);
 		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-		float moveY = worldTransform_.translation_.y + rect.bottom;
+		float moveY = rect.top - worldTransform_.translation_.y;
 
 		info.move.y = std::min(0.0f, moveY);
 		info.landing = true;

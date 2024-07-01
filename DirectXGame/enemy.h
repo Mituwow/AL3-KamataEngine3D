@@ -7,8 +7,10 @@
 #include "WorldTransform.h"
 #include <numbers>
 #include <vector> //可変個配列用
+#include "AABB.h"
 
 class MapChipField;
+class Player;
 
 class Enemy {
 
@@ -23,9 +25,15 @@ public:
 	static inline const float kWalkMotionAngleStart = -30.0f;
 	static inline const float kWalkMotionAngleEnd = 60.0f;
 	static inline const float kWalkMotionTime = 0;
+	static inline const float kWidth = 2.0f;
+	static inline const float kHeight = 2.0f;
 
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
-		
+
+	Vector3 GetWorldPosition();
+	aabb::AABB GetAABB(); 	
+	void OnCollision(const Player* player);
+
 private:
 	Model* modelEnemy_ = nullptr;
 	Vector3 velocity_ = {};

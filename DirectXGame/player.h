@@ -7,8 +7,10 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include <vector> //可変個配列用
+#include "AABB.h"
 
 class MapChipField;
+class Enemy;
 
 class Player {
 
@@ -30,8 +32,8 @@ public:
 	static inline const float kLimitFallSpeed = 1.0f;
 	static inline const float kJumpAccelaration = 1.5f;
 	static inline const float kAttenuationLanding = 0.1f;
-	static inline const float kWidth = 0.8f;
-	static inline const float kHeight = 0.8f;
+	static inline const float kWidth = 1.0f;
+	static inline const float kHeight = 1.0f;
 	static inline const float kBlank = 0.8f;
 
 	enum class LRDirection {
@@ -63,13 +65,8 @@ public:
 	};
 
 	Vector3 GetWorldPosition();
-
-	struct AABB {
-		Vector3 min;
-		Vector3 max;
-	};
-
-	AABB GetAABB(); 
+	aabb::AABB GetAABB(); 
+	void OnCollision(const Enemy* enemy);
 
 private:
 	Model* modelPlayer_ = nullptr;

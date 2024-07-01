@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "Skydome.h"
 #include "TextureManager.h"
+#include "AABB.h"
 #include "enemy.h"
 #include "player.h"
 #include <cassert>
@@ -18,7 +19,7 @@ GameScene::~GameScene() {
 	delete skydome_;
 	delete mapChipField_;
 	delete player_;
-	//enemyがenemies_になりすましてdeleteされ、それをenemies_に連動させるイメージ
+	// enemyがenemies_になりすましてdeleteされ、それをenemies_に連動させるイメージ
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
 	}
@@ -62,6 +63,18 @@ void GameScene::GenerateBlocks() {
 				worldTransformBlocks_[i][j] = worldTransform;
 				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
+		}
+	}
+}
+
+void GameScene::CheckAllCollision() {
+	aabb::AABB aabb1, aabb2;
+	aabb1 = player_->GetAABB();
+	for (Enemy* enemy : enemies_) {
+		aabb2 = enemy->GetAABB();
+		if (aabb::AABBCollision(aabb1, aabb2)) {
+			player_->OnCollision(enemy);
+			enemy->OnCollision(player_);
 		}
 	}
 }
@@ -252,6 +265,9 @@ void GameScene::Update() {
 	for (Enemy* enemy : enemies_) {
 		enemy->Update();
 	}
+
+	CheckAllCollision();
+
 	cameraController_->Update();
 }
 

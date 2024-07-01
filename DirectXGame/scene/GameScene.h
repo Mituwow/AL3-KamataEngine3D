@@ -73,10 +73,12 @@ public: // メンバ関数
 	//自機
 	Player* player_ = nullptr;
 
-	//敵
-	
+	//敵	
 	std::list<Enemy*> enemies_;
 	static inline const uint32_t kEnemyNum = 3;
+
+	//すべての当たり判定を行う
+	void CheckAllCollision();
 
 	//カメラコントローラー
 	CameraController* cameraController_ = nullptr;

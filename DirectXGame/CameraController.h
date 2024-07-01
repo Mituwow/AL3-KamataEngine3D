@@ -38,7 +38,7 @@ public:
 	static inline const uint32_t kMovableLimitStartX = 17;
 	static inline const uint32_t kMovableLimitEndX = 85;
 	static inline const uint32_t kMovableLimitStartY = 10;
-	static inline const uint32_t kMovableLimitEndY = 25;
+	static inline const uint32_t kMovableLimitEndY = 15;
 
 private:
 	ViewProjection viewProjection_;
