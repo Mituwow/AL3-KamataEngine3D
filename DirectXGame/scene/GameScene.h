@@ -14,6 +14,7 @@
 #include "Player.h"
 #include "enemy.h"
 #include "CameraController.h"
+#include "DeathParticles.h"
 
 /// <summary>
 /// ゲームシーン
@@ -72,6 +73,9 @@ public: // メンバ関数
 
 	//自機
 	Player* player_ = nullptr;
+
+	//パーティクル
+	DeathParticles* deathParticles_ = nullptr;
 
 	//敵	
 	std::list<Enemy*> enemies_;

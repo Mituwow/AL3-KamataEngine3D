@@ -217,7 +217,7 @@ void Player::CollisionMapBottom(CollisionMapInfo& info) {
 	if (hit) {
 		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move);
 		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-		float moveY = rect.top - worldTransform_.translation_.y;
+		float moveY = worldTransform_.translation_.y + rect.top;
 
 		info.move.y = std::min(0.0f, moveY);
 		info.landing = true;

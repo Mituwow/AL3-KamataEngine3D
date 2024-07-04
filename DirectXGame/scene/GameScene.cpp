@@ -1,7 +1,7 @@
 #include "GameScene.h"
+#include "AABB.h"
 #include "Skydome.h"
 #include "TextureManager.h"
-#include "AABB.h"
 #include "enemy.h"
 #include "player.h"
 #include <cassert>
@@ -19,6 +19,7 @@ GameScene::~GameScene() {
 	delete skydome_;
 	delete mapChipField_;
 	delete player_;
+	delete deathParticles_;
 	// enemyがenemies_になりすましてdeleteされ、それをenemies_に連動させるイメージ
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
@@ -108,6 +109,10 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	player_->Initialize(Model::CreateFromOBJ("player", true), &viewProjection_, playerPosition);
 	player_->SetMapChipField(mapChipField_);
+
+	// パーティクルの仮生成
+	deathParticles_ = new DeathParticles();
+	deathParticles_->Initialize(Model::CreateFromOBJ("enemy", true), &viewProjection_, playerPosition);
 
 	// 敵
 	for (int32_t i = 0; i < kEnemyNum; ++i) {
@@ -266,6 +271,8 @@ void GameScene::Update() {
 		enemy->Update();
 	}
 
+	deathParticles_->Update();
+
 	CheckAllCollision();
 
 	cameraController_->Update();
@@ -312,6 +319,8 @@ void GameScene::Draw() {
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
+	deathParticles_->Draw();
+
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
