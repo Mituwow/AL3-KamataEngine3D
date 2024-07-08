@@ -87,6 +87,13 @@ public: // メンバ関数
 	//カメラコントローラー
 	CameraController* cameraController_ = nullptr;
 
+	//ゲームのフェーズ(型)
+	enum class Phase {
+		kPlay,
+		kDeath,
+	};
+	Phase phase_;
+
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;

@@ -86,6 +86,9 @@ void GameScene::Initialize() {
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 
+	// ゲームプレイフェーズ(変数)
+	phase_ = Phase::kPlay;
+
 	// ビュープロの初期化
 	viewProjection_.Initialize();
 
@@ -132,6 +135,65 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
+	// 天球
+	skydome_->Update();
+	for (int i = 0; i < 1; i++) {
+
+		// 拡縮行列の作成
+		Matrix4x4 scaleMatrix = {0};
+		scaleMatrix.m[0][0] = skydome_->worldTransform_.scale_.x;
+		scaleMatrix.m[1][1] = skydome_->worldTransform_.scale_.y;
+		scaleMatrix.m[2][2] = skydome_->worldTransform_.scale_.z;
+		scaleMatrix.m[3][3] = 1;
+
+		// XYZ軸それぞれの回転行列の作成(これをヘッダーにまとめて呼びやすくするとなお良し)
+		// X
+		Matrix4x4 rotateXMatrix = {0};
+		rotateXMatrix.m[0][0] = 1;
+		rotateXMatrix.m[1][1] = std::cos(skydome_->worldTransform_.rotation_.x);
+		rotateXMatrix.m[1][2] = std::sin(skydome_->worldTransform_.rotation_.x);
+		rotateXMatrix.m[2][1] = -std::sin(skydome_->worldTransform_.rotation_.x);
+		rotateXMatrix.m[2][2] = std::cos(skydome_->worldTransform_.rotation_.x);
+		rotateXMatrix.m[3][3] = 1;
+		// Y
+		Matrix4x4 rotateYMatrix = {0};
+		rotateYMatrix.m[0][0] = std::cos(skydome_->worldTransform_.rotation_.y);
+		rotateYMatrix.m[0][2] = -std::sin(skydome_->worldTransform_.rotation_.y);
+		rotateYMatrix.m[1][1] = 1;
+		rotateYMatrix.m[2][0] = std::sin(skydome_->worldTransform_.rotation_.y);
+		rotateYMatrix.m[2][2] = std::cos(skydome_->worldTransform_.rotation_.y);
+		rotateYMatrix.m[3][3] = 1;
+		// Z
+		Matrix4x4 rotateZMatrix = {0};
+		rotateZMatrix.m[0][0] = std::cos(skydome_->worldTransform_.rotation_.z);
+		rotateZMatrix.m[0][1] = std::sin(skydome_->worldTransform_.rotation_.z);
+		rotateZMatrix.m[1][0] = -std::sin(skydome_->worldTransform_.rotation_.z);
+		rotateZMatrix.m[1][1] = std::cos(skydome_->worldTransform_.rotation_.z);
+		rotateZMatrix.m[2][2] = 1;
+		rotateZMatrix.m[3][3] = 1;
+		// XYZ回転行列の合成
+		Matrix4x4 rotateXYZMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
+
+		// 平行移動行列の作成
+		Matrix4x4 translationMatrix = {0};
+		translationMatrix.m[0][0] = 1;
+		translationMatrix.m[1][1] = 1;
+		translationMatrix.m[2][2] = 1;
+		translationMatrix.m[3][0] = skydome_->worldTransform_.translation_.x;
+		translationMatrix.m[3][1] = skydome_->worldTransform_.translation_.y;
+		translationMatrix.m[3][2] = skydome_->worldTransform_.translation_.z;
+		translationMatrix.m[3][3] = 1;
+		// すべてを掛け合わせてワールド行列に代入
+		skydome_->worldTransform_.matWorld_ = Multiply(scaleMatrix, Multiply(rotateXYZMatrix, translationMatrix));
+
+		// 定数バッファに転送する
+		skydome_->worldTransform_.TransferMatrix();
+	}
+	// 敵
+	for (Enemy* enemy : enemies_) {
+		enemy->Update();
+	}
+	// ブロック
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 
@@ -189,69 +251,14 @@ void GameScene::Update() {
 			worldTransformBlock->TransferMatrix();
 		}
 	}
-	for (int i = 0; i < 1; i++) {
-
-		// 拡縮行列の作成
-		Matrix4x4 scaleMatrix = {0};
-		scaleMatrix.m[0][0] = skydome_->worldTransform_.scale_.x;
-		scaleMatrix.m[1][1] = skydome_->worldTransform_.scale_.y;
-		scaleMatrix.m[2][2] = skydome_->worldTransform_.scale_.z;
-		scaleMatrix.m[3][3] = 1;
-
-		// XYZ軸それぞれの回転行列の作成(これをヘッダーにまとめて呼びやすくするとなお良し)
-		// X
-		Matrix4x4 rotateXMatrix = {0};
-		rotateXMatrix.m[0][0] = 1;
-		rotateXMatrix.m[1][1] = std::cos(skydome_->worldTransform_.rotation_.x);
-		rotateXMatrix.m[1][2] = std::sin(skydome_->worldTransform_.rotation_.x);
-		rotateXMatrix.m[2][1] = -std::sin(skydome_->worldTransform_.rotation_.x);
-		rotateXMatrix.m[2][2] = std::cos(skydome_->worldTransform_.rotation_.x);
-		rotateXMatrix.m[3][3] = 1;
-		// Y
-		Matrix4x4 rotateYMatrix = {0};
-		rotateYMatrix.m[0][0] = std::cos(skydome_->worldTransform_.rotation_.y);
-		rotateYMatrix.m[0][2] = -std::sin(skydome_->worldTransform_.rotation_.y);
-		rotateYMatrix.m[1][1] = 1;
-		rotateYMatrix.m[2][0] = std::sin(skydome_->worldTransform_.rotation_.y);
-		rotateYMatrix.m[2][2] = std::cos(skydome_->worldTransform_.rotation_.y);
-		rotateYMatrix.m[3][3] = 1;
-		// Z
-		Matrix4x4 rotateZMatrix = {0};
-		rotateZMatrix.m[0][0] = std::cos(skydome_->worldTransform_.rotation_.z);
-		rotateZMatrix.m[0][1] = std::sin(skydome_->worldTransform_.rotation_.z);
-		rotateZMatrix.m[1][0] = -std::sin(skydome_->worldTransform_.rotation_.z);
-		rotateZMatrix.m[1][1] = std::cos(skydome_->worldTransform_.rotation_.z);
-		rotateZMatrix.m[2][2] = 1;
-		rotateZMatrix.m[3][3] = 1;
-		// XYZ回転行列の合成
-		Matrix4x4 rotateXYZMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
-
-		// 平行移動行列の作成
-		Matrix4x4 translationMatrix = {0};
-		translationMatrix.m[0][0] = 1;
-		translationMatrix.m[1][1] = 1;
-		translationMatrix.m[2][2] = 1;
-		translationMatrix.m[3][0] = skydome_->worldTransform_.translation_.x;
-		translationMatrix.m[3][1] = skydome_->worldTransform_.translation_.y;
-		translationMatrix.m[3][2] = skydome_->worldTransform_.translation_.z;
-		translationMatrix.m[3][3] = 1;
-		// すべてを掛け合わせてワールド行列に代入
-		skydome_->worldTransform_.matWorld_ = Multiply(scaleMatrix, Multiply(rotateXYZMatrix, translationMatrix));
-
-		// 定数バッファに転送する
-		skydome_->worldTransform_.TransferMatrix();
-	}
-
-	skydome_->Update();
-
+	// カメラ
 #ifdef DEBUG
 	// デバッグカメラのon/off
 	if (input_->TriggerKey(DIK_SPACE)) {
 		isDebugCameraActive_ ^= true;
 	}
 #endif // DEBUG
-
-	// カメラの処理
+       // カメラの処理
 	if (isDebugCameraActive_) {
 		debugCamera_->Update();
 		viewProjection_.matView = debugCamera_->GetViewProjection().matView;
@@ -266,16 +273,17 @@ void GameScene::Update() {
 		viewProjection_.TransferMatrix();
 	}
 
-	player_->Update();
-	for (Enemy* enemy : enemies_) {
-		enemy->Update();
+	switch (phase_) {
+	case Phase::kPlay:
+
+		player_->Update();
+		CheckAllCollision();
+		cameraController_->Update();
+		break;
+	case Phase::kDeath:
+		deathParticles_->Update();
+		break;
 	}
-
-	deathParticles_->Update();
-
-	CheckAllCollision();
-
-	cameraController_->Update();
 }
 
 void GameScene::Draw() {
@@ -305,8 +313,9 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 
+	//天球
 	skydome_->Draw();
-
+	//ブロック
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			if (!worldTransformBlock) {
@@ -315,12 +324,19 @@ void GameScene::Draw() {
 			blockModel_->Draw(*worldTransformBlock, viewProjection_);
 		}
 	}
-	player_->Draw();
+	//敵
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
-	deathParticles_->Draw();
-
+	
+	switch (phase_) {
+	case Phase::kPlay:
+		player_->Draw();
+		break;
+	case Phase::kDeath:
+		deathParticles_->Draw();
+		break;
+	}
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
