@@ -11,7 +11,7 @@
 #include <array>
 #include <numbers>
 
-class GameScene;
+class TitleScene;
 
 class DeathParticles {
 public:
@@ -25,7 +25,7 @@ public:
 	Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix);
 
 
-	static inline const uint32_t kNumParticles = 6;
+	static inline const uint32_t kNumParticles = 8;
 	static inline const float kDuration = 1.0f;
 	static inline const float kSpeed = 0.1f;
 	static inline const float kAngleUnit = std::numbers::pi_v<float> / float(kNumParticles);

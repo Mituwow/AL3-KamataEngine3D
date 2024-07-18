@@ -68,11 +68,14 @@ public:
 	aabb::AABB GetAABB(); 
 	void OnCollision(const Enemy* enemy);
 
+	bool isDead() const { return isDead_; }
+
 private:
 	Model* modelPlayer_ = nullptr;
 	Vector3 velocity_ = {};
 	WorldTransform worldTransform_;
 	ViewProjection* viewProjection_;
+	bool isDead_ = false;
 
 	MapChipField* mapChipField_ = nullptr;
 

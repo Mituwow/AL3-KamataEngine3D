@@ -93,11 +93,16 @@ public: // メンバ関数
 		kDeath,
 	};
 	Phase phase_;
+	void ChangePhase();
+	bool isDead() const { return isDead_; }
+
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
+	//デスフラグ
+	bool isDead_ = false;
 
 	/// <summary>
 	/// ゲームシーン用

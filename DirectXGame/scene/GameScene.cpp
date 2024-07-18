@@ -115,7 +115,6 @@ void GameScene::Initialize() {
 
 	// パーティクルの仮生成
 	deathParticles_ = new DeathParticles();
-	deathParticles_->Initialize(Model::CreateFromOBJ("enemy", true), &viewProjection_, playerPosition);
 
 	// 敵
 	for (int32_t i = 0; i < kEnemyNum; ++i) {
@@ -279,6 +278,13 @@ void GameScene::Update() {
 		player_->Update();
 		CheckAllCollision();
 		cameraController_->Update();
+		
+		if (player_->isDead()) {
+			phase_ = Phase::kDeath;
+			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+			deathParticles_->Initialize(Model::CreateFromOBJ("deathParticle", true), &viewProjection_, deathParticlesPosition);
+		}
+
 		break;
 	case Phase::kDeath:
 		deathParticles_->Update();
