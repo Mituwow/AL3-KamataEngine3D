@@ -253,7 +253,7 @@ void GameScene::Update() {
 	// カメラ
 #ifdef DEBUG
 	// デバッグカメラのon/off
-	if (input_->TriggerKey(DIK_SPACE)) {
+	if (input_->TriggerKey(DIK_RETURN)) {
 		isDebugCameraActive_ ^= true;
 	}
 #endif // DEBUG
@@ -288,6 +288,9 @@ void GameScene::Update() {
 		break;
 	case Phase::kDeath:
 		deathParticles_->Update();
+		if (deathParticles_ && deathParticles_->IsFinished()) {
+			finished_ = true;
+		}
 		break;
 	}
 }

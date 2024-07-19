@@ -31,6 +31,7 @@ public:
 	static inline const float kAngleUnit = std::numbers::pi_v<float> / float(kNumParticles);
 
 	std::array<WorldTransform, kNumParticles> worldTransform_;
+	bool IsFinished() const { return isFinished_; }
 
 private:
 	Model* modelParticle_ = nullptr;

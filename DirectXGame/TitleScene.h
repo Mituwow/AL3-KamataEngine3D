@@ -13,6 +13,9 @@ public:
 	void Update();
 	void Draw();
 
+	// シーンの終了フラグ
+	bool IsFinished() const { return finished_; };
+
 private:
 	Model* modelTitle_ = nullptr;
 	WorldTransform worldTransform_;
@@ -21,5 +24,7 @@ private:
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
+	// シーンの終了フラグ
+	bool finished_ = false;
 
 };
