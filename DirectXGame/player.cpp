@@ -136,8 +136,9 @@ void Player::CollisionMap(CollisionMapInfo& info) {
 
 Player::AABB Player::GetAABB() {
 	Vector3 worldPos = GetWorldPosition();
-	AABB aabb;
+	AABB aabb = {};
 	aabb.min = {};
+	return aabb;
 }
 
 void Player::CollisionMapTop(CollisionMapInfo& info) {
